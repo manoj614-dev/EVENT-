@@ -71,20 +71,34 @@ async function initDB() {
     );
     console.log('Seeded default admin -> username: admin, password: admin123');
   }
+
+  // Migrations for existing databases created before these features were added
+  await pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS image_url TEXT;`);
+  await pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS price NUMERIC DEFAULT 0;`);
+  await pool.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS transaction_id TEXT;`);
 }
 
 // ===================== AUTH =====================
 
 // LOGIN (used by student.html's login form)
+// Admin credentials are checked against the admins table.
+// Student login uses a simple rule instead of a real password check:
+// the password must be the username spelled backwards.
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
+
   const result = await pool.query(
     'SELECT * FROM admins WHERE username = $1 AND password = $2',
     [username, password]
   );
   if (result.rows.length > 0) return res.json({ role: 'admin' });
-  // Dummy student login (kept as-is from the original behavior)
-  return res.json({ role: 'student' });
+
+  const reversed = (username || '').split('').reverse().join('');
+  if (username && password && password === reversed) {
+    return res.json({ role: 'student' });
+  }
+
+  return res.json({}); // no role -> login failed
 });
 
 // ADMIN LOGIN (separate gate used by admin.html)
@@ -128,7 +142,9 @@ function rowToEvent(row) {
     department: row.department,
     coordinator: row.coordinator,
     location: row.location,
-    maxSeats: row.max_seats
+    maxSeats: row.max_seats,
+    image: row.image_url,
+    price: row.price ? parseFloat(row.price) : 0
   };
 }
 
@@ -140,11 +156,11 @@ app.get('/events', async (req, res) => {
 
 // ADD EVENT
 app.post('/add-event', async (req, res) => {
-  const { title, desc, date, lastDate, department, coordinator, location, maxSeats } = req.body;
+  const { title, desc, date, lastDate, department, coordinator, location, maxSeats, imageUrl, price } = req.body;
   await pool.query(
-    `INSERT INTO events (title, description, date, last_date, department, coordinator, location, max_seats)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-    [title, desc, date, lastDate, department, coordinator, location, maxSeats || null]
+    `INSERT INTO events (title, description, date, last_date, department, coordinator, location, max_seats, image_url, price)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [title, desc, date, lastDate, department, coordinator, location, maxSeats || null, imageUrl || null, price || 0]
   );
   res.json({ message: 'Event added' });
 });
@@ -159,11 +175,16 @@ app.post('/delete-event', async (req, res) => {
 
 // STUDENT EVENT REGISTRATION
 app.post('/register', async (req, res) => {
-  const { name, regNo, branch, event } = req.body;
+  const { name, regNo, branch, event, transactionId } = req.body;
 
   const eventResult = await pool.query('SELECT * FROM events WHERE title = $1', [event]);
   const e = eventResult.rows[0];
   if (!e) return res.status(404).json({ error: 'Event not found' });
+
+  const eventPrice = e.price ? parseFloat(e.price) : 0;
+  if (eventPrice > 0 && !transactionId) {
+    return res.status(400).json({ error: 'Transaction ID is required for paid events' });
+  }
 
   const countResult = await pool.query(
     'SELECT COUNT(*) FROM registrations WHERE event_title = $1',
@@ -177,24 +198,31 @@ app.post('/register', async (req, res) => {
 
   const now = new Date();
   await pool.query(
-    `INSERT INTO registrations (name, reg_no, branch, event_title, reg_date, reg_time)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [name, regNo, branch, event, now.toLocaleDateString(), now.toLocaleTimeString()]
+    `INSERT INTO registrations (name, reg_no, branch, event_title, reg_date, reg_time, transaction_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [name, regNo, branch, event, now.toLocaleDateString(), now.toLocaleTimeString(), transactionId || null]
   );
 
   res.json({ message: 'Registered' });
 });
 
-// GET REGISTRATIONS
+// GET REGISTRATIONS (joined with events so price is available per row)
 app.get('/registrations', async (req, res) => {
-  const result = await pool.query('SELECT * FROM registrations ORDER BY id');
+  const result = await pool.query(`
+    SELECT r.*, e.price AS event_price
+    FROM registrations r
+    LEFT JOIN events e ON r.event_title = e.title
+    ORDER BY r.id
+  `);
   res.json(result.rows.map(r => ({
     name: r.name,
     regNo: r.reg_no,
     branch: r.branch,
     event: r.event_title,
     date: r.reg_date,
-    time: r.reg_time
+    time: r.reg_time,
+    transactionId: r.transaction_id,
+    price: r.event_price ? parseFloat(r.event_price) : 0
   })));
 });
 
