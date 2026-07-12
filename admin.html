@@ -385,6 +385,32 @@
     to   { transform: translateX(100%); }
   }
 
+  .collected-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--ink), var(--ink-deep));
+    color: var(--paper);
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  .collected-summary span {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: .5px;
+    color: var(--ink-70);
+  }
+
+  .collected-summary b {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--gold-light);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .admin-login-box, header h1, .tab-content, table tbody tr, .progress-bar::after {
       animation: none !important;
@@ -433,6 +459,8 @@
       <input id="lastDate" type="date" placeholder="Registration Last Date">
       <input id="location" placeholder="Location">
       <input id="maxSeats" type="number" placeholder="Max Seats">
+      <input id="imageUrl" placeholder="Image URL (optional)">
+      <input id="price" type="number" min="0" step="0.01" placeholder="Price ₹ (0 or blank = free)">
       <button onclick="addEvent()">Add Event</button>
     </div>
 
@@ -440,6 +468,7 @@
     <table>
       <thead>
         <tr>
+          <th>Image</th>
           <th>Title</th>
           <th>Department</th>
           <th>Coordinator</th>
@@ -447,6 +476,7 @@
           <th>Last Date</th>
           <th>Location</th>
           <th>Max Seats</th>
+          <th>Price</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -465,6 +495,8 @@
           <th>Register No</th>
           <th>Branch</th>
           <th>Event</th>
+          <th>Price</th>
+          <th>Transaction ID</th>
           <th>Date</th>
           <th>Time</th>
         </tr>
@@ -534,7 +566,9 @@ function addEvent(){
       department:department.value,
       coordinator:coordinator.value,
       location:location.value,
-      maxSeats:parseInt(maxSeats.value)
+      maxSeats:parseInt(maxSeats.value),
+      imageUrl:imageUrl.value,
+      price:parseFloat(price.value)||0
     })
   }).then(()=>{alert("Event added!"); loadAdminEvents();});
 }
@@ -543,8 +577,13 @@ function loadAdminEvents(){
   fetch("/events").then(res=>res.json()).then(events=>{
     let html="";
     events.forEach(e=>{
+      const imgCell = e.image
+        ? `<img src="${e.image}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">`
+        : "—";
+      const priceCell = e.price > 0 ? `₹${e.price}` : "Free";
       html+=`
       <tr>
+        <td>${imgCell}</td>
         <td>${e.title}</td>
         <td>${e.department}</td>
         <td>${e.coordinator}</td>
@@ -552,6 +591,7 @@ function loadAdminEvents(){
         <td style="color:var(--ruby);font-weight:600;">${e.lastDate}</td>
         <td>${e.location}</td>
         <td>${e.maxSeats||"N/A"}</td>
+        <td>${priceCell}</td>
         <td><button class="delete-btn" onclick="deleteEvent('${e.title}')">Delete</button></td>
       </tr>`;
     });
@@ -562,12 +602,16 @@ function loadAdminEvents(){
   fetch("/registrations").then(res=>res.json()).then(data=>{
     let html="";
     data.forEach((r,i)=>{
+      const priceCell = r.price > 0 ? `₹${r.price}` : "Free";
+      const txnCell = r.transactionId || (r.price > 0 ? "—" : "N/A");
       html+=`<tr>
         <td>${i+1}</td>
         <td>${r.name||""}</td>
         <td>${r.regNo||""}</td>
         <td>${r.branch||""}</td>
         <td>${r.event||""}</td>
+        <td>${priceCell}</td>
+        <td>${txnCell}</td>
         <td>${r.date||""}</td>
         <td>${r.time||""}</td>
       </tr>`;
@@ -588,19 +632,33 @@ function updateStats(){
   fetch("/events").then(res=>res.json()).then(events=>{
     fetch("/registrations").then(res=>res.json()).then(regs=>{
       let html="";
+      let totalCollected = 0;
+
       events.forEach(e=>{
-        let registered=regs.filter(r=>r.event===e.title).length;
+        let eventRegs = regs.filter(r=>r.event===e.title);
+        let registered = eventRegs.length;
         let maxSeats=e.maxSeats||10;
         let percent=Math.min((registered/maxSeats)*100,100);
+        let revenue = e.price > 0 ? registered * e.price : 0;
+        totalCollected += revenue;
+
         html+=`
         <div style="margin-bottom:22px;">
           <b>${e.title}</b> <span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-70);">(${registered}/${maxSeats})</span>
+          ${e.price > 0 ? `<span style="font-family:var(--font-mono); font-size:12px; color:var(--emerald); margin-left:8px;">₹${revenue} collected</span>` : ""}
           <div class="progress-container">
             <div class="progress-bar" style="width:${percent}%"></div>
           </div>
         </div>`;
       });
-      document.getElementById("statsContainer").innerHTML=html;
+
+      const summary = `
+        <div class="collected-summary">
+          <span>💰 Total Money Collected</span>
+          <b>₹${totalCollected}</b>
+        </div>`;
+
+      document.getElementById("statsContainer").innerHTML = summary + html;
     });
   });
 }
