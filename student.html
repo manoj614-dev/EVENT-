@@ -4,20 +4,21 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Event Register - Student</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #1B1F3B;
-    --ink-deep: #12152B;
-    --paper: #FFF9F0;
-    --paper-tint: #FFF1DC;
-    --marigold: #FFB627;
-    --coral: #FF6B5B;
-    --mint: #2EC4B6;
+    --ink: #14141C;
+    --ink-deep: #08080C;
+    --paper: #F8F3E7;
+    --paper-tint: #F1E6C9;
+    --gold: #D4AF37;
+    --gold-light: #E9CE6E;
+    --ruby: #A6283C;
+    --emerald: #127864;
     --ink-70: rgba(27,31,59,0.7);
     --ink-15: rgba(27,31,59,0.15);
 
-    --font-display: 'Bebas Neue', sans-serif;
+    --font-display: 'Playfair Display', serif;
     --font-body: 'Work Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
   }
@@ -73,7 +74,7 @@
 
   .register-toggle-btn:hover {
     background: rgba(255,249,240,0.1);
-    border-color: var(--marigold);
+    border-color: var(--gold);
   }
 
   .container {
@@ -85,7 +86,7 @@
   .left {
     flex: 1;
     min-width: 300px;
-    background: linear-gradient(165deg, #232853, var(--ink-deep));
+    background: linear-gradient(165deg, #1E1E26, var(--ink-deep));
     color: var(--paper);
     padding: 60px 34px;
     display: flex;
@@ -110,14 +111,14 @@
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 3px;
-    color: var(--marigold);
+    color: var(--gold);
     text-transform: uppercase;
     margin-bottom: 6px;
   }
 
   .left h2 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 700;
     font-size: 34px;
     letter-spacing: 1px;
     margin: 0 0 28px;
@@ -141,7 +142,7 @@
   }
 
   .left input:focus {
-    border-bottom-color: var(--marigold);
+    border-bottom-color: var(--gold);
     outline: none;
   }
 
@@ -149,7 +150,7 @@
     width: 100%;
     margin: 22px 0 6px;
     padding: 13px;
-    background: var(--marigold);
+    background: var(--gold);
     border: none;
     border-radius: 8px;
     color: var(--ink);
@@ -161,9 +162,9 @@
   }
 
   .left button:not(.register-toggle-btn):hover {
-    background: #ffc453;
+    background: var(--gold-light);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255,182,39,0.3);
+    box-shadow: 0 8px 20px rgba(212,175,55,0.3);
   }
 
   .right {
@@ -176,7 +177,7 @@
 
   .right h2 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 700;
     font-size: 26px;
     letter-spacing: 1px;
     margin: 0 0 14px;
@@ -243,7 +244,7 @@
   .ticket-main h3 {
     margin: 0 0 6px;
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 700;
     font-size: 22px;
     letter-spacing: .5px;
   }
@@ -264,7 +265,7 @@
   }
 
   .ticket-main .deadline {
-    color: var(--coral);
+    color: var(--ruby);
     font-weight: 600;
   }
 
@@ -306,7 +307,7 @@
   .ticket-card::after { bottom: -9px; }
 
   .register-btn {
-    background: var(--marigold);
+    background: var(--gold);
     color: var(--ink);
     border: none;
     padding: 10px 14px;
@@ -322,7 +323,7 @@
 
   .register-btn:hover:not(:disabled) {
     background: var(--ink);
-    color: var(--marigold);
+    color: var(--gold);
     transform: scale(1.06);
   }
 
@@ -367,7 +368,7 @@
     border-radius: 14px;
     box-shadow: 0 24px 60px rgba(0,0,0,0.35);
     animation: modalPop .3s cubic-bezier(.2,.8,.3,1.2) both;
-    border-top: 6px solid var(--marigold);
+    border-top: 6px solid var(--gold);
   }
 
   @keyframes modalPop {
@@ -377,7 +378,7 @@
 
   .modal-content h2 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 700;
     font-size: 26px;
     letter-spacing: .5px;
     margin: 0 0 4px;
@@ -387,7 +388,7 @@
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 2px;
-    color: var(--coral);
+    color: var(--ruby);
     text-transform: uppercase;
     margin-bottom: 16px;
   }
@@ -401,7 +402,7 @@
   }
 
   .close:hover {
-    color: var(--coral);
+    color: var(--ruby);
     transform: rotate(90deg);
   }
 
@@ -418,7 +419,7 @@
   }
 
   .modal-content input:focus {
-    border-color: var(--marigold);
+    border-color: var(--gold);
     box-shadow: 0 0 0 3px rgba(255,182,39,0.15);
     outline: none;
   }
@@ -442,12 +443,12 @@
   }
 
   .modal-actions button:first-child {
-    background: var(--mint);
+    background: var(--emerald);
     color: var(--ink-deep);
   }
 
   .modal-actions button:first-child:hover {
-    background: #27b3a6;
+    background: #0E5F4E;
     transform: translateY(-2px);
   }
 
