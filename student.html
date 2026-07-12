@@ -77,6 +77,14 @@
     border-color: var(--gold);
   }
 
+  .login-hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(248,243,231,0.55);
+    text-align: center;
+    margin: 8px 0 0;
+  }
+
   .container {
     display: flex;
     flex-wrap: wrap;
@@ -241,6 +249,36 @@
     min-width: 0;
   }
 
+  .ticket-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .price-tag {
+    display: inline-block;
+    margin-top: 8px;
+    margin-left: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .5px;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .price-tag.free {
+    background: rgba(18,120,100,0.12);
+    color: var(--emerald);
+  }
+
+  .price-tag.paid {
+    background: rgba(212,175,55,0.18);
+    color: #9c7a1a;
+  }
+
   .ticket-main h3 {
     margin: 0 0 6px;
     font-family: var(--font-display);
@@ -393,6 +431,33 @@
     margin-bottom: 16px;
   }
 
+  .price-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .price-badge.free {
+    background: rgba(18,120,100,0.15);
+    color: var(--emerald);
+  }
+
+  .price-badge.paid {
+    background: rgba(212,175,55,0.18);
+    color: #9c7a1a;
+  }
+
+  .txn-hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-70);
+    margin: -4px 0 8px;
+  }
+
   .close {
     float: right;
     cursor: pointer;
@@ -483,6 +548,7 @@
       <input id="username" placeholder="Username">
       <input id="password" type="password" placeholder="Password">
       <button onclick="login()">Login</button>
+      <p class="login-hint">Tip: your password is your username spelled backwards</p>
       <button class="register-toggle-btn" onclick="showStudentForm('register')">New Student? Register Here</button>
     </div>
 
@@ -516,11 +582,16 @@
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">×</span>
-    <div class="modal-eyebrow">Register for</div>
+    <div class="modal-eyebrow" id="modalEyebrow">Register for</div>
     <h2 id="eventTitle"></h2>
+    <div id="modalPriceBadge" class="price-badge"></div>
     <input id="studentName" placeholder="Name">
     <input id="studentRegNo" placeholder="Register Number">
     <input id="studentBranch" placeholder="Branch">
+    <div id="txnField" style="display:none;">
+      <input id="transactionId" placeholder="Transaction ID">
+      <p class="txn-hint">Enter only the payment transaction / reference ID — no card or bank details.</p>
+    </div>
     <div class="modal-actions">
       <button onclick="register()">Submit</button>
       <button class="modal-close-btn" onclick="closeModal()">Close</button>
@@ -584,6 +655,8 @@ function escapeAttr(str) {
     .replace(/'/g, "&#39;");
 }
 
+let eventsByTitle = {};
+
 function loadEvents() {
   fetch("/events")
     .then(res => res.json())
@@ -591,13 +664,24 @@ function loadEvents() {
       let cards = "";
       let scroll = "";
       let today = new Date().toISOString().split("T")[0];
+      eventsByTitle = {};
 
       events.forEach((e, i) => {
         let expired = e.lastDate && e.lastDate < today;
+        eventsByTitle[e.title] = e;
+
+        const imageHtml = e.image
+          ? `<img class="ticket-image" src="${e.image}" alt="${escapeAttr(e.title)}">`
+          : "";
+
+        const priceHtml = e.price > 0
+          ? `<span class="price-tag paid">₹${e.price}</span>`
+          : `<span class="price-tag free">Free</span>`;
 
         cards += `
           <div class="ticket-card" style="animation-delay:${(i * 0.06).toFixed(2)}s">
             <div class="ticket-main">
+              ${imageHtml}
               <h3>${e.title}</h3>
               <p class="desc">${e.desc || ""}</p>
               <div class="ticket-meta">
@@ -605,6 +689,7 @@ function loadEvents() {
                 <span class="deadline">⏳ ${e.lastDate || "N/A"}</span>
               </div>
               <span class="dept">${e.department || "N/A"}</span>
+              ${priceHtml}
             </div>
             <div class="ticket-stub">
               <button class="register-btn" data-title="${escapeAttr(e.title)}" ${expired ? "disabled" : ""}>
@@ -631,10 +716,21 @@ document.getElementById("events").addEventListener("click", function(e){
 
 function openModal(title) {
   selectedEvent = title;
+  const ev = eventsByTitle[title] || {};
+  const isPaid = ev.price > 0;
+
   eventTitle.innerText = title;
   studentName.value = "";
   studentRegNo.value = "";
   studentBranch.value = "";
+  transactionId.value = "";
+
+  const badge = document.getElementById("modalPriceBadge");
+  badge.textContent = isPaid ? `Paid Event · ₹${ev.price}` : "Free Event";
+  badge.className = "price-badge " + (isPaid ? "paid" : "free");
+
+  document.getElementById("txnField").style.display = isPaid ? "block" : "none";
+
   modal.style.display = "block";
 }
 
@@ -647,6 +743,15 @@ function register() {
     alert("Please fill in Name, Register Number and Branch.");
     return;
   }
+
+  const ev = eventsByTitle[selectedEvent] || {};
+  const isPaid = ev.price > 0;
+
+  if(isPaid && !transactionId.value){
+    alert("Please enter the Transaction ID for this paid event.");
+    return;
+  }
+
   fetch("/register", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -654,10 +759,16 @@ function register() {
       name: studentName.value,
       regNo: studentRegNo.value,
       branch: studentBranch.value,
-      event: selectedEvent
+      event: selectedEvent,
+      transactionId: isPaid ? transactionId.value : null
     })
   })
-  .then(() => {
+  .then(async res => {
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){
+      alert("❌ " + (data.error || "Registration failed"));
+      return;
+    }
     alert("✅ Successfully Registered!");
     closeModal();
   });
