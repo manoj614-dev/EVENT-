@@ -288,6 +288,47 @@
     transition: 0.2s;
   }
 
+  .image-upload-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .image-upload-field input[type="file"] {
+    display: none;
+  }
+
+  .image-upload-label {
+    display: inline-block;
+    padding: 10px;
+    text-align: center;
+    background: var(--paper-tint);
+    border: 1.5px dashed var(--ink-15);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--ink-70);
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .image-upload-label:hover {
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  #imagePreview {
+    display: none;
+    width: 100%;
+    max-height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  #imagePreview.show {
+    display: block;
+  }
+
   .add-event button:hover {
     background: #0E5F4E;
     transform: translateY(-2px);
@@ -459,7 +500,11 @@
       <input id="lastDate" type="date" placeholder="Registration Last Date">
       <input id="location" placeholder="Location">
       <input id="maxSeats" type="number" placeholder="Max Seats">
-      <input id="imageUrl" placeholder="Image URL (optional)">
+      <div class="image-upload-field">
+        <label for="eventImage" class="image-upload-label">📷 Upload Event Image (camera or file)</label>
+        <input type="file" id="eventImage" accept="image/*" capture="environment" onchange="handleImageSelect(event)">
+        <img id="imagePreview" alt="Preview">
+      </div>
       <input id="price" type="number" min="0" step="0.01" placeholder="Price ₹ (0 or blank = free)">
       <button onclick="addEvent()">Add Event</button>
     </div>
@@ -554,6 +599,47 @@ function openTab(tabId, btn){
 
 window.addEventListener('resize', positionIndicator);
 
+let selectedImageDataUrl = "";
+
+function handleImageSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // Resize down to keep the stored image reasonably small
+      const maxDim = 900;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+      selectedImageDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
+      const preview = document.getElementById('imagePreview');
+      preview.src = selectedImageDataUrl;
+      preview.classList.add('show');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetImagePicker() {
+  selectedImageDataUrl = "";
+  eventImage.value = "";
+  const preview = document.getElementById('imagePreview');
+  preview.src = "";
+  preview.classList.remove('show');
+}
+
 function addEvent(){
   fetch("/add-event",{
     method:"POST",
@@ -567,10 +653,14 @@ function addEvent(){
       coordinator:coordinator.value,
       location:location.value,
       maxSeats:parseInt(maxSeats.value),
-      imageUrl:imageUrl.value,
+      imageUrl:selectedImageDataUrl,
       price:parseFloat(price.value)||0
     })
-  }).then(()=>{alert("Event added!"); loadAdminEvents();});
+  }).then(()=>{
+    alert("Event added!");
+    resetImagePicker();
+    loadAdminEvents();
+  });
 }
 
 function loadAdminEvents(){
