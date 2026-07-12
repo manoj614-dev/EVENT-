@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Event Register - Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B1F3B;
+    --ink-deep: #12152B;
+    --paper: #FFF9F0;
+    --paper-tint: #FFF1DC;
+    --marigold: #FFB627;
+    --coral: #FF6B5B;
+    --mint: #2EC4B6;
+    --ink-70: rgba(27,31,59,0.7);
+    --ink-15: rgba(27,31,59,0.12);
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Work Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    margin: 0;
+    background: #F1EEE4;
+    color: var(--ink);
+  }
+
+  .back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    padding: 8px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 999;
+    text-decoration: none;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    transition: transform .2s ease, background .2s ease;
+  }
+
+  .back-btn:hover {
+    background: var(--ink-deep);
+    transform: translateX(-3px);
+  }
+
+  /* ===== Admin login gate ===== */
+  .admin-login-box {
+    max-width: 380px;
+    margin: 110px auto;
+    background: linear-gradient(165deg, #232853, var(--ink-deep));
+    color: var(--paper);
+    padding: 36px 30px;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,182,39,0.15);
+    text-align: center;
+    animation: keycardIn .5s cubic-bezier(.2,.8,.3,1.2) both, glowPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes keycardIn {
+    from { opacity: 0; transform: translateY(20px) scale(.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 24px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,182,39,0.15); }
+    50%      { box-shadow: 0 24px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,182,39,0.4); }
+  }
+
+  .admin-login-box .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--marigold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .admin-login-box h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: 1px;
+    margin: 0 0 22px;
+  }
+
+  .admin-login-box input {
+    width: 100%;
+    padding: 12px 4px;
+    margin: 10px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid rgba(255,249,240,0.35);
+    color: var(--paper);
+    font-size: 14px;
+    font-family: var(--font-body);
+  }
+
+  .admin-login-box input::placeholder {
+    color: rgba(255,249,240,0.5);
+  }
+
+  .admin-login-box input:focus {
+    border-bottom-color: var(--marigold);
+    outline: none;
+  }
+
+  .admin-login-box button {
+    width: 100%;
+    margin: 22px 0 0;
+    padding: 13px;
+    background: var(--marigold);
+    border: none;
+    border-radius: 8px;
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  .admin-login-box button:hover {
+    background: #ffc453;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,182,39,0.3);
+  }
+
+  /* ===== Header ===== */
+  header {
+    background: linear-gradient(135deg, var(--ink), var(--ink-deep));
+    color: var(--paper);
+    padding: 28px 20px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--marigold), var(--coral), var(--mint));
+  }
+
+  header h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 34px;
+    letter-spacing: 2px;
+    margin: 0;
+    animation: fadeSlideUp .5s ease both;
+  }
+
+  header .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--marigold);
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Tabs with animated indicator ===== */
+  .tabs {
+    display: flex;
+    position: relative;
+    margin: 24px auto 0;
+    width: 90%;
+    max-width: 1000px;
+    background: white;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 -2px 0 rgba(27,31,59,0.04) inset;
+  }
+
+  .tabs button {
+    flex: 1;
+    padding: 14px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--ink-70);
+    border: none;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    transition: color .2s ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .tabs button.active {
+    color: var(--ink);
+  }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: var(--marigold);
+    border-radius: 3px 3px 0 0;
+    transition: left .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1);
+    z-index: 1;
+  }
+
+  .tab-content {
+    background: white;
+    padding: 26px;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 30px rgba(27,31,59,0.08);
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto 40px;
+    animation: fadeIn .35s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .tab-content h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: .5px;
+    margin: 0 0 16px;
+  }
+
+  /* ===== Add event form ===== */
+  .add-event {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 34px;
+  }
+
+  .add-event input,
+  .add-event textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-bottom: 1.5px solid var(--ink-15);
+    border-radius: 4px 4px 0 0;
+    background: var(--paper-tint);
+    font-size: 14px;
+    font-family: var(--font-body);
+    transition: 0.2s;
+  }
+
+  .add-event textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .add-event input:focus,
+  .add-event textarea:focus {
+    border-bottom-color: var(--marigold);
+    background: #FFF6E5;
+    outline: none;
+  }
+
+  .add-event button {
+    grid-column: span 2;
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--mint);
+    color: var(--ink-deep);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .add-event button:hover {
+    background: #27b3a6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(46,196,182,0.3);
+  }
+
+  /* ===== Tables ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table th, table td {
+    padding: 11px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--ink-15);
+    font-size: 13px;
+  }
+
+  table th {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+  }
+
+  table tbody tr {
+    transition: background .15s ease;
+    animation: rowFadeIn .3s ease both;
+  }
+
+  table tbody tr:nth-child(even) {
+    background: var(--paper-tint);
+  }
+
+  table tbody tr:hover {
+    background: #FFE9C2;
+  }
+
+  @keyframes rowFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .delete-btn {
+    background: var(--coral);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: 0.2s;
+  }
+
+  .delete-btn:hover {
+    background: #e0473a;
+    transform: scale(1.06);
+  }
+
+  /* ===== Analytics ===== */
+  .progress-container {
+    background: var(--ink-15);
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+    height: 18px;
+    margin-top: 6px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--marigold), var(--coral));
+    width: 0;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: shimmer 1.8s linear infinite;
+  }
+
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-login-box, header h1, .tab-content, table tbody tr, .progress-bar::after {
+      animation: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="index.html">← BACK</a>
+
+<!-- Admin login gate -->
+<div class="admin-login-box" id="adminLoginBox">
+  <div class="eyebrow">Secure Access</div>
+  <h2>🔐 Admin Login</h2>
+  <input id="adminUsername" placeholder="Admin Username">
+  <input id="adminPassword" type="password" placeholder="Admin Password">
+  <button onclick="adminLogin()">Login</button>
+</div>
+
+<!-- Admin dashboard content (hidden until login) -->
+<div id="adminDashboardContent" style="display:none;">
+
+  <header>
+    <div class="eyebrow">Control Room</div>
+    <h1>🎓 Admin Dashboard</h1>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabsBar">
+    <button class="tab-btn active" onclick="openTab('eventsTab', this)">Events</button>
+    <button class="tab-btn" onclick="openTab('regTab', this)">Registrations</button>
+    <button class="tab-btn" onclick="openTab('statsTab', this)">Analytics</button>
+    <div class="tab-indicator" id="tabIndicator"></div>
+  </div>
+
+  <!-- Events Tab -->
+  <div class="tab-content" id="eventsTab">
+    <h2>Add New Event</h2>
+    <div class="add-event">
+      <input id="title" placeholder="Event Title">
+      <input id="department" placeholder="Department">
+      <textarea id="desc" placeholder="Event Description"></textarea>
+      <input id="coordinator" placeholder="Coordinator Name &amp; Contact">
+      <input id="date" type="date" placeholder="Event Date">
+      <input id="lastDate" type="date" placeholder="Registration Last Date">
+      <input id="location" placeholder="Location">
+      <input id="maxSeats" type="number" placeholder="Max Seats">
+      <button onclick="addEvent()">Add Event</button>
+    </div>
+
+    <h2>All Events</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Department</th>
+          <th>Coordinator</th>
+          <th>Date</th>
+          <th>Last Date</th>
+          <th>Location</th>
+          <th>Max Seats</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="eventList"></tbody>
+    </table>
+  </div>
+
+  <!-- Registrations Tab -->
+  <div class="tab-content" id="regTab" style="display:none;">
+    <h2>Student Registrations</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Name</th>
+          <th>Register No</th>
+          <th>Branch</th>
+          <th>Event</th>
+          <th>Date</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="regList"></tbody>
+    </table>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div class="tab-content" id="statsTab" style="display:none;">
+    <h2>Registration Analytics</h2>
+    <div id="statsContainer"></div>
+  </div>
+
+</div>
+
+<script>
+function adminLogin(){
+  fetch("/admin-login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: adminUsername.value,
+      password: adminPassword.value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      document.getElementById('adminLoginBox').style.display = 'none';
+      document.getElementById('adminDashboardContent').style.display = 'block';
+      loadAdminEvents();
+      requestAnimationFrame(positionIndicator);
+    } else {
+      alert("❌ Admin login failed");
+    }
+  });
+}
+
+function positionIndicator(){
+  const activeBtn = document.querySelector('.tab-btn.active');
+  const indicator = document.getElementById('tabIndicator');
+  if(!activeBtn || !indicator) return;
+  indicator.style.left = activeBtn.offsetLeft + "px";
+  indicator.style.width = activeBtn.offsetWidth + "px";
+}
+
+function openTab(tabId, btn){
+  document.querySelectorAll('.tab-content').forEach(tab=>tab.style.display='none');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tabId).style.display='block';
+  btn.classList.add('active');
+  positionIndicator();
+}
+
+window.addEventListener('resize', positionIndicator);
+
+function addEvent(){
+  fetch("/add-event",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      title:title.value,
+      desc:desc.value,
+      date:date.value,
+      lastDate:lastDate.value,
+      department:department.value,
+      coordinator:coordinator.value,
+      location:location.value,
+      maxSeats:parseInt(maxSeats.value)
+    })
+  }).then(()=>{alert("Event added!"); loadAdminEvents();});
+}
+
+function loadAdminEvents(){
+  fetch("/events").then(res=>res.json()).then(events=>{
+    let html="";
+    events.forEach(e=>{
+      html+=`
+      <tr>
+        <td>${e.title}</td>
+        <td>${e.department}</td>
+        <td>${e.coordinator}</td>
+        <td>${e.date}</td>
+        <td style="color:var(--coral);font-weight:600;">${e.lastDate}</td>
+        <td>${e.location}</td>
+        <td>${e.maxSeats||"N/A"}</td>
+        <td><button class="delete-btn" onclick="deleteEvent('${e.title}')">Delete</button></td>
+      </tr>`;
+    });
+    document.getElementById("eventList").innerHTML=html;
+    updateStats();
+  });
+
+  fetch("/registrations").then(res=>res.json()).then(data=>{
+    let html="";
+    data.forEach((r,i)=>{
+      html+=`<tr>
+        <td>${i+1}</td>
+        <td>${r.name||""}</td>
+        <td>${r.regNo||""}</td>
+        <td>${r.branch||""}</td>
+        <td>${r.event||""}</td>
+        <td>${r.date||""}</td>
+        <td>${r.time||""}</td>
+      </tr>`;
+    });
+    document.getElementById("regList").innerHTML=html;
+  });
+}
+
+function deleteEvent(title){
+  fetch("/delete-event",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({title})
+  }).then(()=>loadAdminEvents());
+}
+
+function updateStats(){
+  fetch("/events").then(res=>res.json()).then(events=>{
+    fetch("/registrations").then(res=>res.json()).then(regs=>{
+      let html="";
+      events.forEach(e=>{
+        let registered=regs.filter(r=>r.event===e.title).length;
+        let maxSeats=e.maxSeats||10;
+        let percent=Math.min((registered/maxSeats)*100,100);
+        html+=`
+        <div style="margin-bottom:22px;">
+          <b>${e.title}</b> <span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-70);">(${registered}/${maxSeats})</span>
+          <div class="progress-container">
+            <div class="progress-bar" style="width:${percent}%"></div>
+          </div>
+        </div>`;
+      });
+      document.getElementById("statsContainer").innerHTML=html;
+    });
+  });
+}
+</script>
+
+</body>
+</html>

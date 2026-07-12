@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Event Register - Student</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B1F3B;
+    --ink-deep: #12152B;
+    --paper: #FFF9F0;
+    --paper-tint: #FFF1DC;
+    --marigold: #FFB627;
+    --coral: #FF6B5B;
+    --mint: #2EC4B6;
+    --ink-70: rgba(27,31,59,0.7);
+    --ink-15: rgba(27,31,59,0.15);
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Work Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    padding: 8px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 999;
+    text-decoration: none;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    transition: transform .2s ease, background .2s ease;
+  }
+
+  .back-btn:hover {
+    background: var(--ink-deep);
+    transform: translateX(-3px);
+  }
+
+  .register-toggle-btn {
+    width: 100%;
+    display: block;
+    margin: 10px auto 0;
+    padding: 10px;
+    background: transparent;
+    border: 1px dashed rgba(255,249,240,0.4);
+    border-radius: 8px;
+    color: rgba(255,249,240,0.85);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .5px;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  .register-toggle-btn:hover {
+    background: rgba(255,249,240,0.1);
+    border-color: var(--marigold);
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;
+  }
+
+  .left {
+    flex: 1;
+    min-width: 300px;
+    background: linear-gradient(165deg, #232853, var(--ink-deep));
+    color: var(--paper);
+    padding: 60px 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    animation: slideInLeft .6s ease both;
+  }
+
+  /* torn edge separating boarding-pass panel from the events panel */
+  .left::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -1px;
+    bottom: 0;
+    width: 2px;
+    background-image: repeating-linear-gradient(to bottom, rgba(27,31,59,0.35) 0 10px, transparent 10px 20px);
+  }
+
+  .left .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--marigold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .left h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 34px;
+    letter-spacing: 1px;
+    margin: 0 0 28px;
+  }
+
+  .left input {
+    width: 100%;
+    padding: 12px 4px;
+    margin: 10px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid rgba(255,249,240,0.35);
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-size: 14px;
+    transition: 0.25s;
+  }
+
+  .left input::placeholder {
+    color: rgba(255,249,240,0.5);
+  }
+
+  .left input:focus {
+    border-bottom-color: var(--marigold);
+    outline: none;
+  }
+
+  .left button:not(.register-toggle-btn) {
+    width: 100%;
+    margin: 22px 0 6px;
+    padding: 13px;
+    background: var(--marigold);
+    border: none;
+    border-radius: 8px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  .left button:not(.register-toggle-btn):hover {
+    background: #ffc453;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,182,39,0.3);
+  }
+
+  .right {
+    flex: 2;
+    min-width: 400px;
+    padding: 32px 34px;
+    overflow-y: auto;
+    animation: fadeIn .7s ease both;
+  }
+
+  .right h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: 1px;
+    margin: 0 0 14px;
+  }
+
+  .scroll-box {
+    height: 46px;
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 16px;
+    margin-bottom: 26px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+  }
+
+  .scroll-box::before {
+    content: "🔥";
+    margin-right: 10px;
+  }
+
+  .scroll-text {
+    animation: scrollUp 12s linear infinite;
+  }
+
+  @keyframes scrollUp {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(-100%); }
+  }
+
+  .events {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 24px;
+  }
+
+  /* ===== Ticket-stub event card ===== */
+  .ticket-card {
+    position: relative;
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(27,31,59,0.1);
+    opacity: 0;
+    transform: translateY(18px);
+    animation: fadeSlideUp .5s ease forwards;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+
+  .ticket-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 30px rgba(27,31,59,0.16);
+  }
+
+  .ticket-main {
+    flex: 1;
+    padding: 18px 16px;
+    min-width: 0;
+  }
+
+  .ticket-main h3 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: .5px;
+  }
+
+  .ticket-main p.desc {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--ink-70);
+    line-height: 1.4;
+  }
+
+  .ticket-main .ticket-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .ticket-main .deadline {
+    color: var(--coral);
+    font-weight: 600;
+  }
+
+  .ticket-main .dept {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .5px;
+    background: var(--paper-tint);
+    color: var(--ink);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .ticket-stub {
+    width: 96px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper-tint);
+    border-left: 2px dashed var(--ink-15);
+  }
+
+  /* perforation notches at the tear line */
+  .ticket-card::before,
+  .ticket-card::after {
+    content: "";
+    position: absolute;
+    right: 96px;
+    width: 18px;
+    height: 18px;
+    margin-right: -9px;
+    border-radius: 50%;
+    background: var(--paper);
+  }
+  .ticket-card::before { top: -9px; }
+  .ticket-card::after { bottom: -9px; }
+
+  .register-btn {
+    background: var(--marigold);
+    color: var(--ink);
+    border: none;
+    padding: 10px 14px;
+    border-radius: 7px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .5px;
+    cursor: pointer;
+    transition: transform .15s ease, background .2s ease;
+    writing-mode: horizontal-tb;
+  }
+
+  .register-btn:hover:not(:disabled) {
+    background: var(--ink);
+    color: var(--marigold);
+    transform: scale(1.06);
+  }
+
+  .register-btn:disabled {
+    background: #cfcfcf;
+    color: #888;
+    cursor: not-allowed;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ===== Modal ===== */
+  .modal {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0; left: 0;
+    background: rgba(18,21,43,0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: var(--paper);
+    padding: 26px 26px 22px;
+    margin: 8% auto;
+    width: min(420px, 90%);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    animation: modalPop .3s cubic-bezier(.2,.8,.3,1.2) both;
+    border-top: 6px solid var(--marigold);
+  }
+
+  @keyframes modalPop {
+    from { opacity: 0; transform: translateY(24px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-content h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: .5px;
+    margin: 0 0 4px;
+  }
+
+  .modal-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--coral);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .close {
+    float: right;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--ink-70);
+    transition: color .2s ease, transform .2s ease;
+  }
+
+  .close:hover {
+    color: var(--coral);
+    transform: rotate(90deg);
+  }
+
+  .modal-content input {
+    width: 100%;
+    padding: 11px 10px;
+    margin: 8px 0;
+    display: block;
+    border: 1.5px solid var(--ink-15);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    transition: 0.2s;
+  }
+
+  .modal-content input:focus {
+    border-color: var(--marigold);
+    box-shadow: 0 0 0 3px rgba(255,182,39,0.15);
+    outline: none;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin: 16px 0 0;
+  }
+
+  .modal-actions button {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform .15s ease, background .2s ease;
+  }
+
+  .modal-actions button:first-child {
+    background: var(--mint);
+    color: var(--ink-deep);
+  }
+
+  .modal-actions button:first-child:hover {
+    background: #27b3a6;
+    transform: translateY(-2px);
+  }
+
+  .modal-close-btn {
+    background: var(--ink-15);
+    color: var(--ink);
+  }
+
+  .modal-close-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .left, .right, .ticket-card, .modal-content { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="index.html">← BACK</a>
+
+<div class="container">
+
+  <!-- LOGIN / REGISTER PANEL -->
+  <div class="left">
+
+    <!-- Login form -->
+    <div id="studentLoginForm">
+      <div class="eyebrow">Boarding Pass</div>
+      <h2>Student Login</h2>
+      <input id="username" placeholder="Username">
+      <input id="password" type="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <button class="register-toggle-btn" onclick="showStudentForm('register')">New Student? Register Here</button>
+    </div>
+
+    <!-- New registration form -->
+    <div id="studentRegisterForm" style="display:none;">
+      <div class="eyebrow">New Account</div>
+      <h2>Student Registration</h2>
+      <input id="regName" placeholder="Full Name">
+      <input id="regUsername" placeholder="Choose a Username">
+      <input id="regPassword" type="password" placeholder="Choose a Password">
+      <button onclick="registerStudent()">Register</button>
+      <button class="register-toggle-btn" onclick="showStudentForm('login')">Already have an account? Login</button>
+    </div>
+
+  </div>
+
+  <!-- EVENTS PANEL -->
+  <div class="right">
+    <h2>🔥 Current Events</h2>
+    <div class="scroll-box">
+      <div id="scrollEvents" class="scroll-text">Loading events...</div>
+    </div>
+
+    <h2>📌 All Events</h2>
+    <div id="events" class="events"></div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">×</span>
+    <div class="modal-eyebrow">Register for</div>
+    <h2 id="eventTitle"></h2>
+    <input id="studentName" placeholder="Name">
+    <input id="studentRegNo" placeholder="Register Number">
+    <input id="studentBranch" placeholder="Branch">
+    <div class="modal-actions">
+      <button onclick="register()">Submit</button>
+      <button class="modal-close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedEvent = "";
+
+function showStudentForm(form){
+  document.getElementById('studentLoginForm').style.display = (form === 'login') ? 'block' : 'none';
+  document.getElementById('studentRegisterForm').style.display = (form === 'register') ? 'block' : 'none';
+}
+
+function login() {
+  fetch("/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: username.value,
+      password: password.value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.role){
+      alert(`✅ Logged in as ${data.role}`);
+      loadEvents();
+    } else {
+      alert("❌ Login failed");
+    }
+  });
+}
+
+function registerStudent() {
+  fetch("/signup", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      name: regName.value,
+      username: regUsername.value,
+      password: regPassword.value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      alert("✅ Registration successful! Please login.");
+      showStudentForm('login');
+    } else {
+      alert("❌ Registration failed");
+    }
+  });
+}
+
+function escapeAttr(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function loadEvents() {
+  fetch("/events")
+    .then(res => res.json())
+    .then(events => {
+      let cards = "";
+      let scroll = "";
+      let today = new Date().toISOString().split("T")[0];
+
+      events.forEach((e, i) => {
+        let expired = e.lastDate && e.lastDate < today;
+
+        cards += `
+          <div class="ticket-card" style="animation-delay:${(i * 0.06).toFixed(2)}s">
+            <div class="ticket-main">
+              <h3>${e.title}</h3>
+              <p class="desc">${e.desc || ""}</p>
+              <div class="ticket-meta">
+                <span>📅 ${e.date || "N/A"}</span>
+                <span class="deadline">⏳ ${e.lastDate || "N/A"}</span>
+              </div>
+              <span class="dept">${e.department || "N/A"}</span>
+            </div>
+            <div class="ticket-stub">
+              <button class="register-btn" data-title="${escapeAttr(e.title)}" ${expired ? "disabled" : ""}>
+                ${expired ? "Closed" : "Register"}
+              </button>
+            </div>
+          </div>
+        `;
+
+        scroll += `<p>👉 ${e.title} (${e.department})</p>`;
+      });
+
+      document.getElementById("events").innerHTML = cards;
+      document.getElementById("scrollEvents").innerHTML = scroll;
+    });
+}
+
+// Event delegation: works no matter what characters are in the event title
+document.getElementById("events").addEventListener("click", function(e){
+  if(e.target.classList.contains("register-btn") && !e.target.disabled){
+    openModal(e.target.dataset.title);
+  }
+});
+
+function openModal(title) {
+  selectedEvent = title;
+  eventTitle.innerText = title;
+  studentName.value = "";
+  studentRegNo.value = "";
+  studentBranch.value = "";
+  modal.style.display = "block";
+}
+
+function closeModal() {
+  modal.style.display = "none";
+}
+
+function register() {
+  if(!studentName.value || !studentRegNo.value || !studentBranch.value){
+    alert("Please fill in Name, Register Number and Branch.");
+    return;
+  }
+  fetch("/register", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      name: studentName.value,
+      regNo: studentRegNo.value,
+      branch: studentBranch.value,
+      event: selectedEvent
+    })
+  })
+  .then(() => {
+    alert("✅ Successfully Registered!");
+    closeModal();
+  });
+}
+</script>
+
+</body>
+</html>
