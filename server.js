@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '12mb' }));
 app.use(express.static(__dirname)); // serves index.html, student.html, admin.html
 
 // ===================== DATABASE CONNECTION =====================
