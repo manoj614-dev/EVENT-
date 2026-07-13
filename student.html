@@ -557,6 +557,8 @@
       <div class="eyebrow">New Account</div>
       <h2>Student Registration</h2>
       <input id="regName" placeholder="Full Name">
+      <input id="regEmail" type="email" placeholder="Email">
+      <input id="regMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="Mobile Number">
       <input id="regUsername" placeholder="Choose a Username">
       <input id="regPassword" type="password" placeholder="Choose a Password">
       <button onclick="registerStudent()">Register</button>
@@ -628,22 +630,45 @@ function login() {
 }
 
 function registerStudent() {
+  const email = regEmail.value.trim();
+  const mobile = regMobile.value.trim();
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const mobilePattern = /^[6-9]\d{9}$/; // 10-digit Indian mobile number
+
+  if(!regName.value || !email || !mobile || !regUsername.value || !regPassword.value){
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  if(!emailPattern.test(email)){
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  if(!mobilePattern.test(mobile)){
+    alert("Please enter a valid 10-digit mobile number.");
+    return;
+  }
+
   fetch("/signup", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
       name: regName.value,
+      email: email,
+      mobile: mobile,
       username: regUsername.value,
       password: regPassword.value
     })
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(async res => {
+    const data = await res.json().catch(() => ({}));
     if(data.success){
       alert("✅ Registration successful! Please login.");
       showStudentForm('login');
     } else {
-      alert("❌ Registration failed");
+      alert("❌ " + (data.error || "Registration failed"));
     }
   });
 }
