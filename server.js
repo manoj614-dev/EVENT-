@@ -84,21 +84,21 @@ async function initDB() {
 
 // LOGIN (used by student.html's login form)
 // Admin credentials are checked against the admins table.
-// Student login uses a simple rule instead of a real password check:
-// the password must be the username spelled backwards.
+// Student credentials are checked against the students table (set during signup).
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  const result = await pool.query(
+  const adminResult = await pool.query(
     'SELECT * FROM admins WHERE username = $1 AND password = $2',
     [username, password]
   );
-  if (result.rows.length > 0) return res.json({ role: 'admin' });
+  if (adminResult.rows.length > 0) return res.json({ role: 'admin' });
 
-  const reversed = (username || '').split('').reverse().join('');
-  if (username && password && password === reversed) {
-    return res.json({ role: 'student' });
-  }
+  const studentResult = await pool.query(
+    'SELECT * FROM students WHERE username = $1 AND password = $2',
+    [username, password]
+  );
+  if (studentResult.rows.length > 0) return res.json({ role: 'student' });
 
   return res.json({}); // no role -> login failed
 });
