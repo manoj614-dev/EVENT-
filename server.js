@@ -76,6 +76,8 @@ async function initDB() {
   await pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS image_url TEXT;`);
   await pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS price NUMERIC DEFAULT 0;`);
   await pool.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS transaction_id TEXT;`);
+  await pool.query(`ALTER TABLE students ADD COLUMN IF NOT EXISTS email TEXT;`);
+  await pool.query(`ALTER TABLE students ADD COLUMN IF NOT EXISTS mobile TEXT;`);
 }
 
 // ===================== AUTH =====================
@@ -113,20 +115,36 @@ app.post('/admin-login', async (req, res) => {
 
 // STUDENT SIGN UP
 app.post('/signup', async (req, res) => {
-  const { name, username, password } = req.body;
+  const { name, username, password, email, mobile } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ success: false, error: 'Username and password are required' });
   }
 
-  const existing = await pool.query('SELECT * FROM students WHERE username = $1', [username]);
-  if (existing.rows.length > 0) {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const mobilePattern = /^[6-9]\d{9}$/; // 10-digit Indian mobile number
+
+  if (!email || !emailPattern.test(email)) {
+    return res.status(400).json({ success: false, error: 'Please provide a valid email address' });
+  }
+
+  if (!mobile || !mobilePattern.test(mobile)) {
+    return res.status(400).json({ success: false, error: 'Please provide a valid 10-digit mobile number' });
+  }
+
+  const existingUsername = await pool.query('SELECT * FROM students WHERE username = $1', [username]);
+  if (existingUsername.rows.length > 0) {
     return res.status(400).json({ success: false, error: 'Username already taken' });
   }
 
+  const existingEmail = await pool.query('SELECT * FROM students WHERE email = $1', [email]);
+  if (existingEmail.rows.length > 0) {
+    return res.status(400).json({ success: false, error: 'Email already registered' });
+  }
+
   await pool.query(
-    'INSERT INTO students (name, username, password) VALUES ($1, $2, $3)',
-    [name, username, password]
+    'INSERT INTO students (name, username, password, email, mobile) VALUES ($1, $2, $3, $4, $5)',
+    [name, username, password, email, mobile]
   );
   res.json({ success: true, message: 'Student registered' });
 });
