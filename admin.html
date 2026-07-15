@@ -5,6 +5,7 @@
 <title>Event Register - Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root {
     --ink: #14141C;
@@ -452,6 +453,41 @@
     color: var(--gold-light);
   }
 
+  .chart-wrap {
+    background: var(--paper-tint);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 26px;
+  }
+
+  .event-reg-block {
+    margin-bottom: 28px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--ink-15);
+  }
+
+  .event-reg-block h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: .3px;
+    margin: 0 0 10px;
+  }
+
+  .event-reg-block .reg-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-70);
+  }
+
+  .event-reg-block .no-regs {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-70);
+    margin: 0 0 10px;
+  }
+
   .security-note {
     font-family: var(--font-mono);
     font-size: 12px;
@@ -543,23 +579,8 @@
 
   <!-- Registrations Tab -->
   <div class="tab-content" id="regTab" style="display:none;">
-    <h2>Student Registrations</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>Name</th>
-          <th>Register No</th>
-          <th>Branch</th>
-          <th>Event</th>
-          <th>Price</th>
-          <th>Transaction ID</th>
-          <th>Date</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody id="regList"></tbody>
-    </table>
+    <h2>Student Registrations (Event-wise)</h2>
+    <div id="regByEvent"></div>
   </div>
 
   <!-- Students Tab -->
@@ -583,6 +604,9 @@
   <!-- Analytics Tab -->
   <div class="tab-content" id="statsTab" style="display:none;">
     <h2>Registration Analytics</h2>
+    <div class="chart-wrap">
+      <canvas id="statsChart" height="110"></canvas>
+    </div>
     <div id="statsContainer"></div>
   </div>
 
@@ -694,14 +718,19 @@ function addEvent(){
 }
 
 function loadAdminEvents(){
-  fetch("/events").then(res=>res.json()).then(events=>{
-    let html="";
+  Promise.all([
+    fetch("/events").then(res=>res.json()),
+    fetch("/registrations").then(res=>res.json())
+  ]).then(([events, regs])=>{
+
+    // Events table
+    let evHtml="";
     events.forEach(e=>{
       const imgCell = e.image
         ? `<img src="${e.image}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">`
         : "—";
       const priceCell = e.price > 0 ? `₹${e.price}` : "Free";
-      html+=`
+      evHtml+=`
       <tr>
         <td>${imgCell}</td>
         <td>${e.title}</td>
@@ -715,28 +744,47 @@ function loadAdminEvents(){
         <td><button class="delete-btn" onclick="deleteEvent('${e.title}')">Delete</button></td>
       </tr>`;
     });
-    document.getElementById("eventList").innerHTML=html;
-    updateStats();
-  });
+    document.getElementById("eventList").innerHTML=evHtml;
 
-  fetch("/registrations").then(res=>res.json()).then(data=>{
-    let html="";
-    data.forEach((r,i)=>{
-      const priceCell = r.price > 0 ? `₹${r.price}` : "Free";
-      const txnCell = r.transactionId || (r.price > 0 ? "—" : "N/A");
-      html+=`<tr>
-        <td>${i+1}</td>
-        <td>${r.name||""}</td>
-        <td>${r.regNo||""}</td>
-        <td>${r.branch||""}</td>
-        <td>${r.event||""}</td>
-        <td>${priceCell}</td>
-        <td>${txnCell}</td>
-        <td>${r.date||""}</td>
-        <td>${r.time||""}</td>
-      </tr>`;
+    // Registrations grouped event-wise
+    let regHtml = "";
+    events.forEach(e=>{
+      const eventRegs = regs.filter(r=>r.event===e.title);
+      regHtml += `<div class="event-reg-block">
+        <h3>${e.title} <span class="reg-count">(${eventRegs.length} registered)</span></h3>`;
+
+      if(eventRegs.length === 0){
+        regHtml += `<p class="no-regs">No registrations yet.</p>`;
+      } else {
+        regHtml += `<table>
+          <thead>
+            <tr>
+              <th>S.No</th><th>Name</th><th>Register No</th><th>Branch</th>
+              <th>Price</th><th>Transaction ID</th><th>Date</th><th>Time</th>
+            </tr>
+          </thead>
+          <tbody>`;
+        eventRegs.forEach((r,i)=>{
+          const priceCell = r.price > 0 ? `₹${r.price}` : "Free";
+          const txnCell = r.transactionId || (r.price > 0 ? "—" : "N/A");
+          regHtml += `<tr>
+            <td>${i+1}</td>
+            <td>${r.name||""}</td>
+            <td>${r.regNo||""}</td>
+            <td>${r.branch||""}</td>
+            <td>${priceCell}</td>
+            <td>${txnCell}</td>
+            <td>${r.date||""}</td>
+            <td>${r.time||""}</td>
+          </tr>`;
+        });
+        regHtml += `</tbody></table>`;
+      }
+      regHtml += `</div>`;
     });
-    document.getElementById("regList").innerHTML=html;
+    document.getElementById("regByEvent").innerHTML = regHtml || `<p class="no-regs">No events yet.</p>`;
+
+    updateStats(events, regs);
   });
 
   loadStudents();
@@ -766,38 +814,93 @@ function deleteEvent(title){
   }).then(()=>loadAdminEvents());
 }
 
-function updateStats(){
-  fetch("/events").then(res=>res.json()).then(events=>{
-    fetch("/registrations").then(res=>res.json()).then(regs=>{
-      let html="";
-      let totalCollected = 0;
+let statsChartInstance = null;
 
-      events.forEach(e=>{
-        let eventRegs = regs.filter(r=>r.event===e.title);
-        let registered = eventRegs.length;
-        let maxSeats=e.maxSeats||10;
-        let percent=Math.min((registered/maxSeats)*100,100);
-        let revenue = e.price > 0 ? registered * e.price : 0;
-        totalCollected += revenue;
+function updateStats(events, regs){
+  let html="";
 
-        html+=`
-        <div style="margin-bottom:22px;">
-          <b>${e.title}</b> <span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-70);">(${registered}/${maxSeats})</span>
-          ${e.price > 0 ? `<span style="font-family:var(--font-mono); font-size:12px; color:var(--emerald); margin-left:8px;">₹${revenue} collected</span>` : ""}
-          <div class="progress-container">
-            <div class="progress-bar" style="width:${percent}%"></div>
-          </div>
-        </div>`;
-      });
+  events.forEach(e=>{
+    let eventRegs = regs.filter(r=>r.event===e.title);
+    let registered = eventRegs.length;
+    let maxSeats=e.maxSeats||10;
+    let percent=Math.min((registered/maxSeats)*100,100);
+    let revenue = e.price > 0 ? registered * e.price : 0;
 
-      const summary = `
-        <div class="collected-summary">
-          <span>💰 Total Money Collected</span>
-          <b>₹${totalCollected}</b>
-        </div>`;
+    html+=`
+    <div style="margin-bottom:22px;">
+      <b>${e.title}</b> <span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-70);">(${registered}/${maxSeats})</span>
+      ${e.price > 0 ? `<span style="font-family:var(--font-mono); font-size:12px; color:var(--emerald); margin-left:8px;">₹${revenue} collected</span>` : ""}
+      <div class="progress-container">
+        <div class="progress-bar" style="width:${percent}%"></div>
+      </div>
+    </div>`;
+  });
 
-      document.getElementById("statsContainer").innerHTML = summary + html;
-    });
+  document.getElementById("statsContainer").innerHTML = html;
+
+  renderStatsChart(events, regs);
+}
+
+function renderStatsChart(events, regs){
+  const canvas = document.getElementById('statsChart');
+  if(!canvas || typeof Chart === 'undefined') return;
+
+  const labels = events.map(e => e.title);
+  const regCounts = events.map(e => regs.filter(r => r.event === e.title).length);
+  const moneyCollected = events.map(e => {
+    const count = regs.filter(r => r.event === e.title).length;
+    return e.price > 0 ? count * e.price : 0;
+  });
+
+  if(statsChartInstance) statsChartInstance.destroy();
+
+  statsChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Registrations',
+          data: regCounts,
+          borderColor: '#D4AF37',
+          backgroundColor: 'rgba(212,175,55,0.15)',
+          yAxisID: 'yReg',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 4
+        },
+        {
+          label: 'Money Collected (₹)',
+          data: moneyCollected,
+          borderColor: '#127864',
+          backgroundColor: 'rgba(18,120,100,0.15)',
+          yAxisID: 'yMoney',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { font: { family: "'Work Sans', sans-serif" } } }
+      },
+      scales: {
+        x: { ticks: { font: { family: "'IBM Plex Mono', monospace" }, autoSkip: false, maxRotation: 30, minRotation: 0 } },
+        yReg: {
+          type: 'linear', position: 'left', beginAtZero: true,
+          title: { display: true, text: 'Registrations' },
+          ticks: { precision: 0 }
+        },
+        yMoney: {
+          type: 'linear', position: 'right', beginAtZero: true,
+          title: { display: true, text: '₹ Collected' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
   });
 }
 </script>
