@@ -149,6 +149,14 @@ app.post('/signup', async (req, res) => {
   res.json({ success: true, message: 'Student registered' });
 });
 
+// GET STUDENTS (admin view of signed-up accounts)
+app.get('/students', async (req, res) => {
+  const result = await pool.query(
+    'SELECT name, username, password, email, mobile FROM students ORDER BY id'
+  );
+  res.json(result.rows);
+});
+
 // ===================== EVENTS =====================
 
 function rowToEvent(row) {
