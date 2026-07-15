@@ -204,7 +204,7 @@
     to   { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* ===== Floating background event ticket chips ===== */
+  /* ===== Floating background event cards — rising bokeh effect ===== */
   #floatingLayer {
     position: absolute;
     top: 0;
@@ -218,28 +218,27 @@
 
   .float-box {
     position: absolute;
-    left: 100%;
+    bottom: -120px;
     display: flex;
     align-items: center;
     gap: 10px;
-    background: var(--paper);
+    background: rgba(248,243,231,0.94);
     color: var(--ink);
     border-radius: 9px;
     padding: 8px 14px 8px 10px;
     white-space: nowrap;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    animation-name: floatAcross;
-    animation-timing-function: linear;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,175,55,0.35);
+    opacity: 0;
+    animation-name: riseFade;
+    animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
-    border-left: 4px solid var(--gold);
+    will-change: transform, opacity;
   }
 
-  .float-box.c1 { border-left-color: var(--gold); }
-  .float-box.c2 { border-left-color: var(--ruby); }
-  .float-box.c3 { border-left-color: var(--emerald); }
-
   .float-box .float-icon {
-    font-size: 22px;
+    font-size: 20px;
+    filter: grayscale(15%);
   }
 
   .float-box .float-info {
@@ -259,10 +258,11 @@
     color: #7A7568;
   }
 
-  @keyframes floatAcross {
-    0%   { transform: translateX(0) rotate(0deg); }
-    50%  { transform: translateX(-80vw) rotate(-1deg); }
-    100% { transform: translateX(-160vw) rotate(0deg); }
+  @keyframes riseFade {
+    0%   { transform: translateY(0) scale(var(--s, 1)); opacity: 0; }
+    12%  { opacity: var(--o, 0.9); }
+    82%  { opacity: var(--o, 0.9); }
+    100% { transform: translateY(-118vh) scale(var(--s, 1)); opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -317,7 +317,6 @@ function zoomIntoGate(e, url) {
 }
 
 const EVENT_ICONS = ["🎉","🎤","🎨","🏆","🎭","🎵","📚","💡","⚽","🎬"];
-const COLOR_CLASSES = ["c1","c2","c3"];
 
 fetch("/events")
   .then(res => res.json())
@@ -328,19 +327,30 @@ fetch("/events")
     }
 
     const layer = document.getElementById("floatingLayer");
+    // A few rising instances per event so the background stays populated
+    const totalBoxes = Math.min(events.length * 2, 14);
 
-    events.forEach((e, i) => {
+    for (let i = 0; i < totalBoxes; i++) {
+      const e = events[i % events.length];
       const box = document.createElement("div");
-      box.className = "float-box " + COLOR_CLASSES[i % COLOR_CLASSES.length];
+      box.className = "float-box";
 
       const icon = EVENT_ICONS[i % EVENT_ICONS.length];
-      const top = 8 + Math.random() * 78;
-      const duration = 14 + Math.random() * 10;
+      const left = 4 + Math.random() * 88;      // horizontal position, %
+      const depth = Math.random();              // 0 = far/small/blurred, 1 = near/large/sharp
+      const scale = 0.65 + depth * 0.55;         // 0.65 - 1.2
+      const blur = (1 - depth) * 2.2;            // 0 - 2.2px
+      const opacity = 0.55 + depth * 0.4;        // 0.55 - 0.95
+      const duration = 22 + Math.random() * 16;  // slow, 22-38s
       const delay = -(Math.random() * duration);
 
-      box.style.top = top + "%";
-      box.style.animationDuration = duration + "s";
-      box.style.animationDelay = delay + "s";
+      box.style.left = left + "%";
+      box.style.setProperty('--s', scale.toFixed(2));
+      box.style.setProperty('--o', opacity.toFixed(2));
+      box.style.filter = `blur(${blur.toFixed(1)}px)`;
+      box.style.zIndex = String(Math.round(depth * 10));
+      box.style.animationDuration = duration.toFixed(1) + "s";
+      box.style.animationDelay = delay.toFixed(1) + "s";
 
       box.innerHTML = `
         <span class="float-icon">${icon}</span>
@@ -351,7 +361,7 @@ fetch("/events")
       `;
 
       layer.appendChild(box);
-    });
+    }
   })
   .catch(() => {
     // backend not reachable / no events -> just show the plain background
