@@ -59,6 +59,7 @@
 
   /* ===== Admin login gate ===== */
   .admin-login-box {
+    position: relative;
     max-width: 380px;
     margin: 110px auto;
     background: linear-gradient(165deg, #1E1E26, var(--ink-deep));
@@ -68,6 +69,26 @@
     box-shadow: 0 24px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,182,39,0.15);
     text-align: center;
     animation: keycardIn .5s cubic-bezier(.2,.8,.3,1.2) both, glowPulse 3s ease-in-out infinite;
+    isolation: isolate;
+  }
+
+  .admin-login-box::before {
+    content: "";
+    position: absolute;
+    inset: -1.5px;
+    border-radius: 17px;
+    padding: 1.5px;
+    background: conic-gradient(from 0deg, var(--gold), transparent 25%, transparent 75%, var(--gold));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: spinRing 4s linear infinite;
+    z-index: -1;
+    opacity: 0.7;
+  }
+
+  @keyframes spinRing {
+    to { transform: rotate(360deg); }
   }
 
   @keyframes keycardIn {
@@ -130,6 +151,26 @@
     font-size: 15px;
     cursor: pointer;
     transition: 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .admin-login-box button::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform: skewX(-20deg);
+    transition: left .5s ease;
+  }
+
+  .admin-login-box button:hover::before {
+    left: 130%;
+  }
+
+  .admin-login-box button:active {
+    transform: scale(0.97);
   }
 
   .admin-login-box button:hover {
@@ -153,7 +194,14 @@
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--gold), var(--ruby), var(--emerald));
+    background: linear-gradient(90deg, var(--gold), var(--ruby), var(--emerald), var(--gold));
+    background-size: 200% 100%;
+    animation: underlineShimmer 4s linear infinite;
+  }
+
+  @keyframes underlineShimmer {
+    from { background-position: 0% 0; }
+    to   { background-position: 200% 0; }
   }
 
   header h1 {
@@ -274,6 +322,8 @@
     border-bottom-color: var(--gold);
     background: #F6EFDD;
     outline: none;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px -8px rgba(212,175,55,0.6);
   }
 
   .add-event button {
@@ -287,6 +337,26 @@
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .add-event button::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-20deg);
+    transition: left .5s ease;
+  }
+
+  .add-event button:hover::before {
+    left: 130%;
+  }
+
+  .add-event button:active {
+    transform: scale(0.97);
   }
 
   .image-upload-field {
@@ -361,7 +431,7 @@
   }
 
   table tbody tr {
-    transition: background .15s ease;
+    transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
     animation: rowFadeIn .3s ease both;
   }
 
@@ -371,6 +441,9 @@
 
   table tbody tr:hover {
     background: #EFE0B8;
+    transform: scale(1.006);
+    box-shadow: 0 4px 12px rgba(27,31,59,0.08);
+    position: relative;
   }
 
   @keyframes rowFadeIn {
@@ -388,11 +461,32 @@
     font-weight: 600;
     font-size: 12px;
     transition: 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .delete-btn::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    transition: left .4s ease;
+  }
+
+  .delete-btn:hover::before {
+    left: 130%;
   }
 
   .delete-btn:hover {
     background: #7E1E2E;
     transform: scale(1.06);
+    box-shadow: 0 6px 14px rgba(166,40,60,0.35);
+  }
+
+  .delete-btn:active {
+    transform: scale(0.95);
   }
 
   /* ===== Analytics ===== */
