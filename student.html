@@ -101,7 +101,46 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
+    overflow: hidden;
     animation: slideInLeft .6s ease both;
+  }
+
+  /* subtle animated tech grid */
+  .left::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212,175,55,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,175,55,0.06) 1px, transparent 1px);
+    background-size: 36px 36px;
+    animation: gridDrift 18s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes gridDrift {
+    from { background-position: 0 0, 0 0; }
+    to   { background-position: 36px 72px, -36px 0; }
+  }
+
+  /* scanning glow line sweeping down the panel */
+  .left .scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, transparent, rgba(212,175,55,0.08), transparent);
+    animation: scanSweep 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes scanSweep {
+    0%   { top: -120px; }
+    100% { top: 100%; }
+  }
+
+  .left > * {
+    position: relative;
+    z-index: 1;
   }
 
   /* torn edge separating boarding-pass panel from the events panel */
@@ -113,6 +152,7 @@
     bottom: 0;
     width: 2px;
     background-image: repeating-linear-gradient(to bottom, rgba(27,31,59,0.35) 0 10px, transparent 10px 20px);
+    z-index: 1;
   }
 
   .left .eyebrow {
@@ -143,6 +183,7 @@
     font-family: var(--font-body);
     font-size: 14px;
     transition: 0.25s;
+    position: relative;
   }
 
   .left input::placeholder {
@@ -152,6 +193,7 @@
   .left input:focus {
     border-bottom-color: var(--gold);
     outline: none;
+    box-shadow: 0 6px 12px -6px rgba(212,175,55,0.5);
   }
 
   .left button:not(.register-toggle-btn) {
@@ -167,6 +209,26 @@
     font-size: 15px;
     cursor: pointer;
     transition: 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .left button:not(.register-toggle-btn)::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform: skewX(-20deg);
+    transition: left .5s ease;
+  }
+
+  .left button:not(.register-toggle-btn):hover::before {
+    left: 130%;
+  }
+
+  .left button:not(.register-toggle-btn):active {
+    transform: scale(0.97);
   }
 
   .left button:not(.register-toggle-btn):hover {
@@ -226,6 +288,10 @@
   }
 
   /* ===== Ticket-stub event card ===== */
+  .events {
+    perspective: 1200px;
+  }
+
   .ticket-card {
     position: relative;
     display: flex;
@@ -235,12 +301,13 @@
     opacity: 0;
     transform: translateY(18px);
     animation: fadeSlideUp .5s ease forwards;
-    transition: transform .25s ease, box-shadow .25s ease;
+    transition: transform .2s ease, box-shadow .3s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
 
   .ticket-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 30px rgba(27,31,59,0.16);
+    box-shadow: 0 20px 36px rgba(27,31,59,0.2), 0 0 0 2px rgba(212,175,55,0.5), 0 0 24px rgba(212,175,55,0.2);
   }
 
   .ticket-main {
@@ -393,8 +460,8 @@
     width: 100%;
     height: 100%;
     top: 0; left: 0;
-    background: rgba(18,21,43,0.6);
-    backdrop-filter: blur(2px);
+    background: rgba(18,21,43,0.65);
+    backdrop-filter: blur(4px);
     z-index: 1000;
   }
 
@@ -404,14 +471,31 @@
     margin: 8% auto;
     width: min(420px, 90%);
     border-radius: 14px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
-    animation: modalPop .3s cubic-bezier(.2,.8,.3,1.2) both;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,175,55,0.15);
+    animation: modalPop .35s cubic-bezier(.2,.8,.3,1.2) both, modalGlow 3s ease-in-out 0.4s infinite;
     border-top: 6px solid var(--gold);
+  }
+
+  .modal-content.shake {
+    animation: modalPop .35s cubic-bezier(.2,.8,.3,1.2) both, shakeErr .4s ease;
   }
 
   @keyframes modalPop {
     from { opacity: 0; transform: translateY(24px) scale(.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes modalGlow {
+    0%, 100% { box-shadow: 0 24px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,175,55,0.15); }
+    50%      { box-shadow: 0 24px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,175,55,0.4), 0 0 26px rgba(212,175,55,0.15); }
+  }
+
+  @keyframes shakeErr {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(4px); }
   }
 
   .modal-content h2 {
@@ -540,6 +624,7 @@
 
   <!-- LOGIN / REGISTER PANEL -->
   <div class="left">
+    <div class="scanline"></div>
 
     <!-- Login form -->
     <div id="studentLoginForm">
@@ -548,7 +633,6 @@
       <input id="username" placeholder="Username">
       <input id="password" type="password" placeholder="Password">
       <button onclick="login()">Login</button>
-      
       <button class="register-toggle-btn" onclick="showStudentForm('register')">New Student? Register Here</button>
     </div>
 
@@ -739,6 +823,43 @@ document.getElementById("events").addEventListener("click", function(e){
   }
 });
 
+// Subtle 3D tilt on hover, following the cursor
+const eventsContainer = document.getElementById("events");
+
+// Once a card's entrance animation finishes, hand transform control back
+// to plain inline styles so the tilt effect below can take over smoothly.
+eventsContainer.addEventListener("animationend", function(e){
+  if(e.target.classList.contains("ticket-card") && e.animationName === "fadeSlideUp"){
+    e.target.style.animation = "none";
+    e.target.style.opacity = "1";
+  }
+});
+
+eventsContainer.addEventListener("mousemove", function(e){
+  const card = e.target.closest(".ticket-card");
+  if(!card) return;
+  const rect = card.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const rotateY = ((x / rect.width) - 0.5) * 8;
+  const rotateX = ((y / rect.height) - 0.5) * -8;
+  card.style.transform = `translateY(-5px) perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+eventsContainer.addEventListener("mouseleave", function(e){
+  document.querySelectorAll(".ticket-card").forEach(card => {
+    card.style.transform = "";
+  });
+}, true);
+
+eventsContainer.addEventListener("mouseout", function(e){
+  const card = e.target.closest(".ticket-card");
+  const toCard = e.relatedTarget && e.relatedTarget.closest(".ticket-card");
+  if(card && card !== toCard){
+    card.style.transform = "";
+  }
+});
+
 function openModal(title) {
   selectedEvent = title;
   const ev = eventsByTitle[title] || {};
@@ -763,9 +884,17 @@ function closeModal() {
   modal.style.display = "none";
 }
 
+function shakeModal(){
+  const content = document.querySelector('.modal-content');
+  content.classList.remove('shake');
+  void content.offsetWidth; // restart animation
+  content.classList.add('shake');
+}
+
 function register() {
   if(!studentName.value || !studentRegNo.value || !studentBranch.value){
     alert("Please fill in Name, Register Number and Branch.");
+    shakeModal();
     return;
   }
 
@@ -774,6 +903,7 @@ function register() {
 
   if(isPaid && !transactionId.value){
     alert("Please enter the Transaction ID for this paid event.");
+    shakeModal();
     return;
   }
 
@@ -792,6 +922,7 @@ function register() {
     const data = await res.json().catch(() => ({}));
     if(!res.ok){
       alert("❌ " + (data.error || "Registration failed"));
+      shakeModal();
       return;
     }
     alert("✅ Successfully Registered!");
