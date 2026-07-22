@@ -4,22 +4,26 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Event Register</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #14141C;
-    --ink-deep: #08080C;
-    --paper: #F8F3E7;
-    --gold: #D4AF37;
-    --gold-light: #E9CE6E;
+    --bg: #FFFFFF;
+    --bg-soft: #F6F5F2;
+    --surface: rgba(255,255,255,0.7);
+    --surface-strong: #FFFFFF;
+    --ink: #14161C;
+    --ink-70: rgba(20,22,28,0.68);
+    --ink-40: rgba(20,22,28,0.4);
+    --gold: #B8873D;
+    --gold-deep: #92672A;
+    --gold-soft: rgba(184,135,61,0.14);
     --ruby: #A6283C;
-    --emerald: #127864;
-    --ink-70: rgba(248,243,231,0.72);
-    --ink-40: rgba(248,243,231,0.4);
+    --emerald: #0E6E52;
+    --line: rgba(20,22,28,0.1);
 
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'Work Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
   }
 
   * { box-sizing: border-box; }
@@ -28,6 +32,7 @@
     font-family: var(--font-body);
     margin: 0;
     overflow: hidden;
+    background: var(--bg);
   }
 
   .home-page {
@@ -38,50 +43,47 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background:
-      radial-gradient(circle at 50% -10%, #26262E 0%, var(--ink) 55%, var(--ink-deep) 100%);
-    background-size: cover;
-    color: var(--paper);
+    background: radial-gradient(circle at 50% -10%, #FBFAF7 0%, var(--bg) 60%);
+    color: var(--ink);
     text-align: center;
     overflow: hidden;
   }
 
-  /* slow-drifting aurora blobs for a premium, alive background */
+  /* soft pastel aura blobs for premium depth */
   .aurora {
     position: absolute;
     inset: -10%;
     z-index: 0;
     pointer-events: none;
-    filter: blur(60px);
+    filter: blur(70px);
     opacity: 0.55;
   }
 
   .aurora span {
     position: absolute;
     border-radius: 50%;
-    mix-blend-mode: screen;
     animation: auroraDrift 26s ease-in-out infinite;
   }
 
   .aurora span:nth-child(1) {
-    width: 42vw; height: 42vw;
-    left: 8%; top: 10%;
-    background: radial-gradient(circle, rgba(212,175,55,0.35), transparent 70%);
+    width: 40vw; height: 40vw;
+    left: 6%; top: 8%;
+    background: radial-gradient(circle, rgba(184,135,61,0.22), transparent 70%);
     animation-duration: 24s;
   }
 
   .aurora span:nth-child(2) {
     width: 36vw; height: 36vw;
-    right: 6%; top: 25%;
-    background: radial-gradient(circle, rgba(166,40,60,0.28), transparent 70%);
+    right: 4%; top: 24%;
+    background: radial-gradient(circle, rgba(166,40,60,0.12), transparent 70%);
     animation-duration: 30s;
     animation-delay: -6s;
   }
 
   .aurora span:nth-child(3) {
     width: 38vw; height: 38vw;
-    left: 32%; bottom: -8%;
-    background: radial-gradient(circle, rgba(18,120,100,0.3), transparent 70%);
+    left: 30%; bottom: -10%;
+    background: radial-gradient(circle, rgba(14,110,82,0.14), transparent 70%);
     animation-duration: 34s;
     animation-delay: -14s;
   }
@@ -92,44 +94,100 @@
     66%      { transform: translate(-5%, 4%) scale(0.95); }
   }
 
-  /* subtle dot-grid texture like a bulletin board */
+  /* fine dot-grid texture */
   .home-page::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(248,243,231,0.05) 1.5px, transparent 1.5px);
+    background-image: radial-gradient(rgba(20,22,28,0.05) 1.3px, transparent 1.3px);
     background-size: 26px 26px;
+    mask-image: radial-gradient(circle at 50% 40%, #000 20%, transparent 75%);
     pointer-events: none;
     z-index: 1;
+  }
+
+  .hud-corner {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border: 1.5px solid rgba(184,135,61,0.5);
+    z-index: 2;
+    opacity: 0.8;
+  }
+  .hud-corner.tl { top: 22px; left: 22px; border-right: none; border-bottom: none; }
+  .hud-corner.tr { top: 22px; right: 22px; border-left: none; border-bottom: none; }
+  .hud-corner.bl { bottom: 22px; left: 22px; border-right: none; border-top: none; }
+  .hud-corner.br { bottom: 22px; right: 22px; border-left: none; border-top: none; }
+
+  .status-line {
+    position: absolute;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--emerald);
+    text-transform: uppercase;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeSlideUp .6s ease forwards;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 8px rgba(14,110,82,0.6);
+    animation: statusBlink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes statusBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
   }
 
   .eyebrow {
     font-family: var(--font-mono);
     font-size: 12px;
-    letter-spacing: 4px;
-    color: var(--gold);
+    letter-spacing: 5px;
+    color: var(--gold-deep);
     text-transform: uppercase;
     z-index: 2;
     position: relative;
     opacity: 0;
-    animation: fadeSlideUp .6s ease .05s forwards;
+    animation: fadeSlideUp .6s ease .1s forwards;
   }
 
   .home-page h1 {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 68px;
-    letter-spacing: 0.5px;
-    font-style: italic;
-    margin: 6px 0 46px;
+    font-size: 64px;
+    letter-spacing: -0.5px;
+    margin: 14px 0 50px;
     z-index: 2;
     position: relative;
     opacity: 0;
-    animation: fadeSlideUp .7s ease .15s forwards;
+    animation: fadeSlideUp .7s ease .2s forwards;
   }
 
   .home-page h1 span {
-    color: var(--gold);
+    font-style: italic;
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--gold-deep));
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: holoShift 6s linear infinite;
+  }
+
+  @keyframes holoShift {
+    from { background-position: 0% 0; }
+    to   { background-position: 300% 0; }
   }
 
   .home-choices {
@@ -141,21 +199,21 @@
     position: relative;
   }
 
-  /* ===== Ticket-shaped choice buttons ===== */
+  /* ===== Premium glass gate buttons ===== */
   .ticket-btn {
     position: relative;
-    width: 220px;
-    padding: 30px 20px 22px;
-    border-radius: 16px;
-    background: linear-gradient(160deg, #1E1E26, #0C0C10);
-    border: 1px solid rgba(212,175,55,0.3);
-    color: var(--paper);
+    width: 230px;
+    padding: 34px 22px 24px;
+    border-radius: 14px;
+    background: var(--surface-strong);
+    border: 1px solid var(--line);
+    color: var(--ink);
     text-decoration: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 14px 34px rgba(0,0,0,0.35);
+    box-shadow: 0 14px 34px rgba(20,22,28,0.08), 0 2px 6px rgba(20,22,28,0.04);
     opacity: 0;
     animation: scaleIn .55s cubic-bezier(.2,.8,.3,1.2) forwards, breatheGlow 4s ease-in-out infinite;
     animation-fill-mode: forwards, none;
@@ -168,19 +226,14 @@
   .ticket-btn:nth-child(2) { animation-delay: .5s, 1.5s; }
 
   @keyframes breatheGlow {
-    0%, 100% { box-shadow: 0 14px 34px rgba(0,0,0,0.35), 0 0 0 0 rgba(212,175,55,0); }
-    50%      { box-shadow: 0 14px 34px rgba(0,0,0,0.35), 0 0 24px 2px rgba(212,175,55,0.18); }
-  }
-
-  /* rotating gradient ring revealed on hover */
-  .ticket-btn::after {
-    content: none;
+    0%, 100% { box-shadow: 0 14px 34px rgba(20,22,28,0.08), 0 0 0 0 rgba(184,135,61,0); }
+    50%      { box-shadow: 0 14px 34px rgba(20,22,28,0.08), 0 0 26px 2px rgba(184,135,61,0.16); }
   }
 
   .ticket-btn .ring {
     position: absolute;
     inset: -2px;
-    border-radius: 18px;
+    border-radius: 16px;
     padding: 2px;
     background: conic-gradient(from 0deg, var(--gold), transparent 30%, transparent 70%, var(--gold));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -192,61 +245,40 @@
     z-index: -1;
   }
 
-  .ticket-btn:hover .ring {
-    opacity: 1;
-  }
+  .ticket-btn:hover .ring { opacity: 1; }
 
   @keyframes spinRing {
     to { transform: rotate(360deg); }
   }
 
-  /* shine sweep on hover */
   .ticket-btn .shine {
     position: absolute;
     top: 0;
     left: -60%;
     width: 40%;
     height: 100%;
-    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+    background: linear-gradient(120deg, transparent, rgba(184,135,61,0.12), transparent);
     transform: skewX(-20deg);
     transition: left .6s ease;
     pointer-events: none;
   }
 
-  .ticket-btn:hover .shine {
-    left: 130%;
-  }
+  .ticket-btn:hover .shine { left: 130%; }
 
-  .ticket-btn::before {
-    content: "";
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--ink-deep);
-    top: 50%;
-    left: -11px;
-    transform: translateY(-50%);
-    box-shadow: inset 0 0 0 9999px var(--ink);
-    z-index: 2;
-  }
-
+  .ticket-btn::before,
   .ticket-btn .notch-right {
     content: "";
     position: absolute;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--ink-deep);
-    top: 50%;
-    right: -11px;
-    transform: translateY(-50%);
-    box-shadow: inset 0 0 0 9999px var(--ink);
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid rgba(184,135,61,0.7);
     z-index: 2;
   }
+  .ticket-btn::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+  .ticket-btn .notch-right { bottom: 8px; right: 8px; border-left: none; border-top: none; }
 
   .ticket-btn .icon {
-    font-size: 34px;
+    font-size: 32px;
     transition: transform .3s ease;
   }
 
@@ -257,16 +289,16 @@
   .ticket-btn .label {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 27px;
-    letter-spacing: 0.5px;
+    font-size: 24px;
+    letter-spacing: 0.2px;
   }
 
   .ticket-btn .sub {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 2px;
-    color: var(--ink-70);
-    border-top: 1px dashed rgba(248,243,231,0.2);
+    color: var(--ink-40);
+    border-top: 1px dashed var(--line);
     padding-top: 10px;
     width: 100%;
     text-align: center;
@@ -275,18 +307,19 @@
   .ticket-btn:hover {
     transform: translateY(-6px) scale(1.03);
     border-color: var(--gold);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.45), 0 0 0 3px rgba(212,175,55,0.18);
+    box-shadow: 0 20px 40px rgba(20,22,28,0.12), 0 0 0 3px rgba(184,135,61,0.14);
     animation-play-state: paused, paused;
   }
 
   .ticket-btn:nth-child(2):hover {
     border-color: var(--ruby);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.45), 0 0 0 3px rgba(166,40,60,0.25);
+    box-shadow: 0 20px 40px rgba(20,22,28,0.12), 0 0 0 3px rgba(166,40,60,0.14);
   }
 
   /* ===== Zoom-into-gate transition ===== */
   .home-page.zooming .eyebrow,
   .home-page.zooming h1,
+  .home-page.zooming .status-line,
   .home-page.zooming #floatingLayer {
     opacity: 0 !important;
     transition: opacity .3s ease;
@@ -303,6 +336,7 @@
     border-radius: 50%;
     box-shadow: none;
     z-index: 50;
+    background: var(--gold-soft);
     transition: transform .6s cubic-bezier(.6,0,.4,1), border-radius .6s ease;
   }
 
@@ -326,7 +360,7 @@
     to   { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* ===== Floating background event cards — rising bokeh effect ===== */
+  /* ===== Floating background event cards ===== */
   #floatingLayer {
     position: absolute;
     top: 0;
@@ -344,13 +378,13 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(248,243,231,0.94);
+    background: rgba(255,255,255,0.92);
     color: var(--ink);
     border-radius: 9px;
     padding: 8px 14px 8px 10px;
     white-space: nowrap;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.3);
-    border: 1px solid rgba(212,175,55,0.35);
+    box-shadow: 0 10px 26px rgba(20,22,28,0.1);
+    border: 1px solid rgba(184,135,61,0.3);
     opacity: 0;
     animation-name: riseFade;
     animation-timing-function: ease-in-out;
@@ -363,7 +397,7 @@
     position: absolute;
     inset: -14px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(212,175,55,0.35), transparent 70%);
+    background: radial-gradient(circle, rgba(184,135,61,0.25), transparent 70%);
     z-index: -1;
     animation: glowPulseSoft 3.4s ease-in-out infinite;
   }
@@ -375,7 +409,6 @@
 
   .float-box .float-icon {
     font-size: 20px;
-    filter: grayscale(15%);
   }
 
   .float-box .float-info {
@@ -387,12 +420,13 @@
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 13px;
+    color: var(--ink);
   }
 
   .float-box .float-meta {
     font-family: var(--font-mono);
     font-size: 10px;
-    color: #7A7568;
+    color: var(--ink-40);
   }
 
   @keyframes riseFade {
@@ -406,11 +440,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .eyebrow, .home-page h1, .ticket-btn { animation: none; opacity: 1; }
+    .eyebrow, .home-page h1, .ticket-btn, .status-line { animation: none; opacity: 1; }
     .ticket-btn { animation: none !important; }
     .aurora span { animation: none; }
     .float-box { animation: none; display: none; }
     .float-box::before { animation: none; }
+    .home-page h1 span { animation: none; background: none; -webkit-text-fill-color: var(--gold-deep); color: var(--gold-deep); }
   }
 </style>
 </head>
@@ -419,6 +454,13 @@
 <div class="home-page">
   <div class="aurora"><span></span><span></span><span></span></div>
   <div id="floatingLayer"></div>
+
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+
+  <div class="status-line"><span class="status-dot"></span>SYSTEM ONLINE</div>
 
   <div class="eyebrow">// campus events, one gate at a time</div>
   <h1>Event <span>Register</span></h1>
@@ -457,7 +499,6 @@ function zoomIntoGate(e, url) {
 
   setTimeout(() => {
     window.open(url, '_blank');
-    // reset so the home page is ready next time this tab is used
     document.querySelector('.home-page').classList.remove('zooming');
     btn.classList.remove('zoom-active');
     isZooming = false;
@@ -472,12 +513,10 @@ fetch("/events")
   .then(res => res.json())
   .then(events => {
     if (!events || events.length === 0) {
-      // No events -> no floating boxes at all
       return;
     }
 
     const layer = document.getElementById("floatingLayer");
-    // A few rising instances per event so the background stays populated
     const totalBoxes = Math.min(events.length * 2, 14);
 
     for (let i = 0; i < totalBoxes; i++) {
@@ -486,15 +525,15 @@ fetch("/events")
       box.className = "float-box";
 
       const icon = EVENT_ICONS[i % EVENT_ICONS.length];
-      const left = 4 + Math.random() * 88;      // horizontal position, %
-      const depth = Math.random();              // 0 = far/small/blurred, 1 = near/large/sharp
-      const scale = 0.65 + depth * 0.55;         // 0.65 - 1.2
-      const blur = (1 - depth) * 2.2;            // 0 - 2.2px
-      const opacity = 0.55 + depth * 0.4;        // 0.55 - 0.95
-      const duration = 22 + Math.random() * 16;  // slow, 22-38s
+      const left = 4 + Math.random() * 88;
+      const depth = Math.random();
+      const scale = 0.65 + depth * 0.55;
+      const blur = (1 - depth) * 2.2;
+      const opacity = 0.55 + depth * 0.4;
+      const duration = 22 + Math.random() * 16;
       const delay = -(Math.random() * duration);
-      const wobble = 24 + Math.random() * 46;    // horizontal S-curve amplitude, px
-      const rotate = 2 + Math.random() * 5;      // gentle tilt, deg
+      const wobble = 24 + Math.random() * 46;
+      const rotate = 2 + Math.random() * 5;
 
       box.style.left = left + "%";
       box.style.setProperty('--s', scale.toFixed(2));
@@ -517,9 +556,7 @@ fetch("/events")
       layer.appendChild(box);
     }
   })
-  .catch(() => {
-    // backend not reachable / no events -> just show the plain background
-  });
+  .catch(() => {});
 </script>
 
 </body>
